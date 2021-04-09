@@ -1,0 +1,11 @@
+{
+  "devices": [{
+      "name": "Room 1",
+      "address": "ca:fe:ba:be:f0:0d",
+      "bindKey": "fb215321f0779994eb2ddddb449d5350",
+      "mqttTopic": "sensors/room1"
+  }],
+  "mqtt": {
+    "url": "mqtt://example.com"
+  }
+}
