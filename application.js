@@ -54,7 +54,8 @@ class Application {
         ) {
             return;
         }
-        this.mqttClient.publish(topic, String(value), {
+        this.log.debug(`MQTT publish: ${topic} ${value}`);
+        this.mqttClient.publish(topic, value, {
             retain: true,
         });
     }
