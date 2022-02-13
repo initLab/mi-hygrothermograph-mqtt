@@ -1,6 +1,14 @@
 const { Scanner } = require('homebridge-mi-hygrothermograph/lib/scanner');
 const mqtt = require('mqtt');
 
+class MiScanner extends Scanner {
+  onStateChange(state) {
+    console.log('state change', state);
+    super.onStateChange(state);
+    if (state === "poweredOff") process.exit();
+  }
+}
+
 class Application {
     constructor(config, log) {
         this.config = config || {};
@@ -62,7 +70,7 @@ class Application {
 
     setupScanner() {
         this.config.devices.forEach(device => {
-            const scanner = new Scanner(device.address, {
+            const scanner = new MiScanner(device.address, {
                 log: this.log,
                 bindKey: device.bindKey
             });
