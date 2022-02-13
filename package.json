@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "homebridge-mi-hygrothermograph": "^3.0.3"
+    "homebridge-mi-hygrothermograph": "^3.1.0"
   }
 }
