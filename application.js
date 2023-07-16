@@ -77,20 +77,26 @@ class Application {
             scanner.on('temperatureChange', (temperature, peripheral) => {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Temperature: ${temperature}C`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic, temperature);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic + '/timestamp', Date.now());
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic, JSON.stringify({
+                    timestamp: Date.now(),
+                    value: temperature,
+                }));
             });
             scanner.on('humidityChange', (humidity, peripheral) => {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Humidity: ${humidity}%`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic, humidity);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic + '/timestamp', Date.now());
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic, JSON.stringify({
+                    timestamp: Date.now(),
+                    value: humidity,
+                }));
             });
             scanner.on('batteryChange', (batteryLevel, peripheral) => {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Battery level: ${batteryLevel}%`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic, batteryLevel);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic + '/timestamp', Date.now());
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic, JSON.stringify({
+                    timestamp: Date.now(),
+                    value: batteryLevel,
+                }));
             });
             scanner.on('error', error => {
                 this.log.error(error);
