@@ -78,16 +78,19 @@ class Application {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Temperature: ${temperature}C`);
                 this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic, temperature);
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic + '/timestamp', Date.now());
             });
             scanner.on('humidityChange', (humidity, peripheral) => {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Humidity: ${humidity}%`);
                 this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic, humidity);
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic + '/timestamp', Date.now());
             });
             scanner.on('batteryChange', (batteryLevel, peripheral) => {
                 const {address, id} = peripheral;
                 this.log.debug(`[${address || id}] [${device.name}] Battery level: ${batteryLevel}%`);
                 this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic, batteryLevel);
+                this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic + '/timestamp', Date.now());
             });
             scanner.on('error', error => {
                 this.log.error(error);
