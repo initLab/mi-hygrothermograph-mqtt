@@ -9,6 +9,8 @@ class MiScanner extends Scanner {
   }
 }
 
+const lastTimestamps = {};
+
 class Application {
     constructor(config, log) {
         this.config = config || {};
@@ -69,35 +71,50 @@ class Application {
     }
 
     setupScanner() {
+        const eventHandler = (type, topic, value, name, peripheral) => {
+            const {address, id} = peripheral;
+            this.log.debug(`[${address || id}] [${name}] ${type}: ${value}`);
+            const now = Date.now();
+            const lastTimestamp = lastTimestamps?.[topic] || 0;
+            const delta = now - lastTimestamp;
+            lastTimestamps[topic] = now;
+
+            if (delta < 10_000) {
+                return;
+            }
+
+            this.publishValueToMQTT(topic, JSON.stringify({
+                timestamp: Date.now(),
+                value,
+            }));
+        };
+
         this.config.devices.forEach(device => {
             const scanner = new MiScanner(device.address, {
                 log: this.log,
                 bindKey: device.bindKey
             });
-            scanner.on('temperatureChange', (temperature, peripheral) => {
-                const {address, id} = peripheral;
-                this.log.debug(`[${address || id}] [${device.name}] Temperature: ${temperature}C`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.temperatureMQTTTopic, JSON.stringify({
-                    timestamp: Date.now(),
-                    value: temperature,
-                }));
-            });
-            scanner.on('humidityChange', (humidity, peripheral) => {
-                const {address, id} = peripheral;
-                this.log.debug(`[${address || id}] [${device.name}] Humidity: ${humidity}%`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.humidityMQTTTopic, JSON.stringify({
-                    timestamp: Date.now(),
-                    value: humidity,
-                }));
-            });
-            scanner.on('batteryChange', (batteryLevel, peripheral) => {
-                const {address, id} = peripheral;
-                this.log.debug(`[${address || id}] [${device.name}] Battery level: ${batteryLevel}%`);
-                this.publishValueToMQTT(device.mqttTopic + '/' + this.batteryMQTTTopic, JSON.stringify({
-                    timestamp: Date.now(),
-                    value: batteryLevel,
-                }));
-            });
+            scanner.on('temperatureChange', (temperature, peripheral) => eventHandler(
+                'Temperature',
+                device.mqttTopic + '/' + this.temperatureMQTTTopic,
+                temperature,
+                device.name,
+                peripheral,
+            ));
+            scanner.on('humidityChange', (humidity, peripheral) => eventHandler(
+                'Humidity',
+                device.mqttTopic + '/' + this.humidityMQTTTopic,
+                humidity,
+                device.name,
+                peripheral,
+            ));
+            scanner.on('batteryChange', (batteryLevel, peripheral) => eventHandler(
+                'Battery level',
+                device.mqttTopic + '/' + this.batteryMQTTTopic,
+                batteryLevel,
+                device.name,
+                peripheral,
+            ));
             scanner.on('error', error => {
                 this.log.error(error);
             });
